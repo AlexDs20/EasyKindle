@@ -45,26 +45,6 @@
         return all.length;
     }
 
-    function downloadAllImages(elem) {
-        let imgs = Array.from(elem.parentNode.getElementsByTagName("img"));
-
-        imgs.forEach((img, i) => {
-            let canvas = document.createElement("canvas");
-            const ctx = canvas.getContext("2d");
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            ctx.drawImage(img, 0, 0);
-
-            // Convert canvas to a downloadable link
-            let a = document.createElement("a");
-            a.href = canvas.toDataURL("image/png"); // Get image data
-            a.download = `saved_image_${i}.png`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        });
-    }
-
     function fetchImage(src) {
         return fetch(src)
             .then(response => response.blob())
@@ -102,15 +82,19 @@
                 console.log("Failed: toDataURL for image src: ", img.src);
             }
 
-            if (base64 === "data:,") {
-                fetchImage(img.src).then(b64 => img.src = b64);
+            if (base64 === "data:," || !base64.startsWith("data:,")) {
+                try {
+                    fetchImage(img.src).then(b64 => img.src = b64);
+                } catch (error) {
+                    console.log("Failed: fetch for image src: ", img.src);
+                }
             }
         });
 
         canvas.remove();
     }
 
-    function downloadElementAsHTML(orig_element, filename = "download.html") {
+    function downloadElementAsHTML(orig_element, filename = undefined) {
         const copy_element = orig_element.cloneNode(true);
 
         convertAllImages(copy_element);
@@ -133,6 +117,9 @@
         const blob = new Blob([htmlContent], { type: "text/html" });
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
+        if (filename === undefined) {
+            filename = document.title.replace(/ /g, "_");
+        }
         a.download = filename;
         document.body.appendChild(a);
         a.click();

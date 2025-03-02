@@ -1,0 +1,22 @@
+{
+    "manifest_version": 2,
+    "name": "ToKindle",
+    "version": "0.1",
+    "description": "Gets the selected HTML element and push to kindle",
+    "homepage_url": "https://github.com/AlexDs20/Firefox/Addons/Kindle",
+    "icons": {
+        "48": "icons/ai4_crop.jpg",
+        "96": "icons/ai4_crop.jpg"
+    },
+
+    "permissions": [
+        "activeTab",
+        "<all_urls>"
+    ],
+
+    "browser_action": {
+        "default_title": "ToKindle",
+        "default_icon": "icons/ai4_crop.jpg",
+        "default_popup": "toolbar/popup.html"
+    }
+}

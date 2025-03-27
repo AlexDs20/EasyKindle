@@ -1,33 +1,47 @@
-const text_active = "Deactivate Extension";
-const text_inactive = "Activate Extension";
+const ACTIVE = "Deactivate Extension";
+const INACTIVE = "Activate Extension";
 
-function popup_listen_for_clicks() {
-    document.getElementById('toggleButton').addEventListener('click', (event)=>{
-        // Change the button text based on the extension's state
-        if (event.target.textContent == text_active) {
-            event.target.textContent = text_inactive;
-        } else {
-            event.target.textContent = text_active;
-        }
-
-        browser.tabs.query({ active: true, currentWindow: true })
-            .then((tabs)=>{
-                browser.tabs.sendMessage(tabs[0].id, { command: "kindle_ext_toggle" });
-            })
-            .catch(report_script_error);
-
-    });
+function handleResponse(message) {
+    const button = document.getElementById('toggleButton');
+    if (message.state) {
+        button.textContent = ACTIVE;
+    } else {
+        button.textContent = INACTIVE;
+    }
 }
 
-function report_script_error(error) {
-    console.error(`ERROR: ${error}`);
+function handleError(error) {
+  console.log(`Error: ${error}`);
 }
 
-browser.tabs.query({ active: true, currentWindow: true })
+browser.tabs
+    .query({ active: true, currentWindow: true })
     .then((tabs)=>{
-        browser.tabs.insertCSS(tabs[0].id, { file: "/content_scripts/style.css" });
-        browser.tabs.executeScript(tabs[0].id, { file: "/content_scripts/kindle.js" })
-            .then(popup_listen_for_clicks)
-            .catch(report_script_error);
+        const tabId = tabs[0].id;
+        browser.runtime.sendMessage({ command: "is_tab_id_activated", tabId: tabId })
+            .then(handleResponse, handleError);
+        browser.tabs.insertCSS(tabId, { file: "/content_scripts/style.css" });
+        browser.tabs.executeScript(tabId, { file: "/content_scripts/kindle.js" })
+            .then(() => {
+
+                const button = document.getElementById('toggleButton');
+
+                button.addEventListener('click', (event)=>{
+                    // Change the button text based on the extension's state
+                    let status;
+                    if (event.target.textContent == ACTIVE) {
+                        event.target.textContent = INACTIVE;
+                        status = true;
+                    } else {
+                        event.target.textContent = ACTIVE;
+                        status = false;
+                    }
+
+                    browser.tabs.sendMessage(tabId, { command: "kindle_ext_toggle" });
+
+                });
+
+            })
+            .catch(handleError);
     })
-    .catch(report_script_error);
+    .catch(handleError);

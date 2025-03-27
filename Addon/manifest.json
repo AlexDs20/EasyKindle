@@ -1,6 +1,6 @@
 {
     "manifest_version": 2,
-    "name": "ToKindle",
+    "name": "EasyKindle",
     "version": "0.1",
     "description": "Gets the selected HTML element and push to kindle",
     "homepage_url": "https://github.com/AlexDs20/Firefox/Addons/Kindle",
@@ -14,8 +14,14 @@
         "<all_urls>"
     ],
 
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+
     "browser_action": {
-        "default_title": "ToKindle",
+        "default_title": "EasyKindle",
         "default_icon": "icons/ai4_crop.jpg",
         "default_popup": "toolbar/popup.html"
     }

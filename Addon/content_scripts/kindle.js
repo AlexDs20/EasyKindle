@@ -9,6 +9,8 @@
     browser.runtime.onMessage.addListener((message)=>{
         if (message.command === "kindle_ext_toggle") {
             window.kindle_ext_active = !window.kindle_ext_active
+
+            browser.runtime.sendMessage({ command: "set_current_active_tab", state: window.kindle_ext_active });
             if (window.kindle_ext_active) {
                 setup();
             } else {
@@ -16,6 +18,7 @@
             }
         }
     });
+
 
     const cls = "ke-selected";
 
@@ -100,18 +103,17 @@
         convertAllImages(copy_element);
 
         // Wrap content in a basic HTML document structure
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>${document.title}</title>
-            </head>
-            <body>
-                ${copy_element.outerHTML}
-            </body>
-            </html>`;
+        const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${document.title}</title>
+</head>
+<body>
+    ${copy_element.outerHTML}
+</body>
+</html>`;
 
         // Create a Blob and trigger a download
         const blob = new Blob([htmlContent], { type: "text/html" });
@@ -119,6 +121,9 @@
         a.href = URL.createObjectURL(blob);
         if (filename === undefined) {
             filename = document.title.replace(/ /g, "_");
+        }
+        if (!filename.endsWith(".html")) {
+            filename += ".html";
         }
         a.download = filename;
         document.body.appendChild(a);

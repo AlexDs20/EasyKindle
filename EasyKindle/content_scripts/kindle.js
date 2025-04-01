@@ -3,14 +3,20 @@
         // This should send back that it's already active so that we can keep the "Active flag"
         return;
     }
+    let browserApi;
+    if (chrome !== undefined) {
+        browserApi = chrome;
+    } else {
+        browserApi = browser;
+    }
     window.kindle_ext_injected = true;
     window.kindle_ext_active = false;
 
-    browser.runtime.onMessage.addListener((message)=>{
+    browserApi.runtime.onMessage.addListener((message)=>{
         if (message.command === "kindle_ext_toggle") {
             window.kindle_ext_active = !window.kindle_ext_active
 
-            browser.runtime.sendMessage({ command: "set_current_active_tab", state: window.kindle_ext_active });
+            browserApi.runtime.sendMessage({ command: "set_current_active_tab", state: window.kindle_ext_active });
             if (window.kindle_ext_active) {
                 setup();
             } else {

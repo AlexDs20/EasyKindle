@@ -1,5 +1,5 @@
 {
-    "manifest_version": 2,
+    "manifest_version": 3,
     "name": "EasyKindle",
     "version": "0.1",
     "description": "Gets the selected HTML element and push to kindle",
@@ -11,18 +11,42 @@
 
     "permissions": [
         "activeTab",
+        "storage",
+        "scripting"
+    ],
+
+    "host_permissions": [
         "<all_urls>"
     ],
 
     "background": {
-        "scripts": [
-            "background.js"
-        ]
+        // "service_worker": "background.js",                                // Needed for Chrome
+        "scripts": ["background.js"],                                        // Needed for Firefox
+        "type": "module"
     },
 
-    "browser_action": {
+    "content_scripts": [
+        {
+            "js": ["content_scripts/kindle.js"],
+            "matches": ["<all_urls>"]
+        }
+    ],
+
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "extra/browser_api_wrapper.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+
+    "action": {
         "default_title": "EasyKindle",
         "default_icon": "icons/ai4_crop.jpg",
-        "default_popup": "toolbar/popup.html"
+        "default_popup": "toolbar/popup.html",
+        "default_area": "navbar"
     }
 }

@@ -1,3 +1,11 @@
+let browserApi;
+if (chrome !== undefined) {
+    browserApi = chrome;
+} else {
+    browserApi = browser;
+}
+// Define a common API object
+
 const ACTIVE = "Deactivate Extension";
 const INACTIVE = "Activate Extension";
 
@@ -14,16 +22,15 @@ function handleError(error) {
   console.log(`Error: ${error}`);
 }
 
-browser.tabs
+browserApi.tabs
     .query({ active: true, currentWindow: true })
     .then((tabs)=>{
         const tabId = tabs[0].id;
-        browser.runtime.sendMessage({ command: "is_tab_id_activated", tabId: tabId })
+        browserApi.runtime.sendMessage({ command: "is_tab_id_activated", tabId: tabId })
             .then(handleResponse, handleError);
-        browser.tabs.insertCSS(tabId, { file: "/content_scripts/style.css" });
-        browser.tabs.executeScript(tabId, { file: "/content_scripts/kindle.js" })
+        browserApi.scripting.insertCSS({ target: {tabId: tabId}, files: ["/content_scripts/style.css"] });
+        browserApi.scripting.executeScript({ target: {tabId: tabId}, files: ["/content_scripts/kindle.js"] })
             .then(() => {
-
                 const button = document.getElementById('toggleButton');
 
                 button.addEventListener('click', (event)=>{
@@ -37,8 +44,8 @@ browser.tabs
                         status = false;
                     }
 
-                    browser.tabs.sendMessage(tabId, { command: "kindle_ext_toggle" });
-
+                    browserApi.runtime.sendMessage({ command: "trying to send message to tab", tabId: tabId });
+                    browserApi.tabs.sendMessage(tabId, { command: "kindle_ext_toggle" });
                 });
 
             })

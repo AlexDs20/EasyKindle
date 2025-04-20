@@ -22,7 +22,7 @@
     ],
 
     "background": {
-        // "service_worker": "background.js",                                // Needed for Chrome
+        "service_worker": "background.js",                                   // Needed for Chrome
         "scripts": ["background.js"],                                        // Needed for Firefox
         "type": "module"
     },

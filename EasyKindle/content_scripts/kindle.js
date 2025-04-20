@@ -103,8 +103,53 @@
         canvas.remove();
     }
 
+    const tag_specific_styles = {
+        "": ["",""],
+    };
+    const general_styles = [
+        "border-width",
+        "border-style"
+    ];
+    function keepStyles(orig, cop) {
+        // Get the orig element style and set it inline to the copy
+        const tag = orig.tagName;
+        const orig_styles = window.getComputedStyle(orig);
+
+        const inline_style = {};
+        if (tag in tag_specific_styles) {
+            for (const st=0; st<tag_specific_styles[tag]; st++) {
+                const style_tag = tag_specific_styles[tag] ;
+                inline_style[st] = orig_styles.getPropertyValue(style_tag);
+            }
+        }
+
+        for (let st = 0; st<general_styles.length; st++) {
+            const style_tag = general_styles[st];
+            if (!(style_tag in inline_style)) {
+                inline_style[style_tag] = orig_styles.getPropertyValue(style_tag);
+            }
+        }
+
+        let string_style = "";
+        for (const [st,v] of Object.entries(inline_style)) {
+            string_style += st + ":" + v + "; "
+        }
+
+        cop.setAttribute("style", string_style);
+
+        // Go through the children
+        const n_children = orig.children.length;
+        for (let i=0; i<n_children; i++) {
+            orig_child = orig.children[i];
+            cop_child = cop.children[i];
+            keepStyles(orig_child, cop_child);
+        }
+    }
+
     function downloadElementAsHTML(orig_element, filename = undefined) {
         const copy_element = orig_element.cloneNode(true);
+
+        keepStyles(orig_element, copy_element);
 
         convertAllImages(copy_element);
 
